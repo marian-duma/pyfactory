@@ -2,7 +2,17 @@ import sys
 import signal
 import time
 
+from lib.ArmRobot import UniversalRobot
+from lib.interpolation import linear_interpolation
+
 import utils.connection as connection
+
+from handlers.cube_generator import CubeGenerator
+from handlers.conveyor_handler import ConveyorHandler
+from handlers.feed_robot import FeedRobot
+
+from managers.feed_manager import FeedManager
+
 
 # Global state of the program
 is_running = True
@@ -24,45 +34,37 @@ def main():
     # TODO: implement proper classes or config files
     MOTOR_SPEED = 1.0
 
-    # Object handlers:
-    robot_handle = sim.getObject('/PioneerP3DX')
-    left_motor = sim.getObject('/PioneerP3DX/leftMotor')
-    right_motor = sim.getObject('/PioneerP3DX/rightMotor')
-
-    print(f"{robot_handle=}")
-    print(f"{left_motor=}")
-    print(f"{right_motor=}")
-    
     sim.stopSimulation()
     time.sleep(0.5)
     sim.startSimulation()
     
-    print("Simulation started. Press CTRL+C to stop.")
+    generator = CubeGenerator(sim)
+    conveyor = ConveyorHandler(sim, "/conveyor")
+    robot = FeedRobot('UR3')
     
+    feed_manager = FeedManager(generator, conveyor, robot, "/pick_cube_target", "/release_cube_target")
+
+    print("Simulation started. Press CTRL+C to stop.")
     start_time = sim.getSimulationTime()
     
     try:
         while is_running:
             # AI / control logic:
-            current_time = sim.getSimulationTime()
-            elapsed_time = current_time - start_time
-
-            if elapsed_time < 3.0:
-                sim.setJointTargetVelocity(left_motor, MOTOR_SPEED)
-                sim.setJointTargetVelocity(right_motor, MOTOR_SPEED)
-            elif elapsed_time < 6.0:
-                sim.setJointTargetVelocity(left_motor, -MOTOR_SPEED)
-                sim.setJointTargetVelocity(right_motor, -MOTOR_SPEED)
-            else:
-                start_time = sim.getSimulationTime()
-
-            client.step()
+            feed_manager.start_band()
+            feed_manager.next_cube()
+            time.sleep(2)
+            feed_manager.stop_band()
+            time.sleep(0.5)
+            feed_manager.pick_cube()
+            feed_manager.release_cube()
+            # client.step()
 
     except Exception as e:
         print(f"\nAn error occurred during execution: {e}")
 
     finally:
         try:
+            robot.SetPosition(robot.init_position)
             sim.stopSimulation()
             print("Simulation stopped!")
         except Exception as e:
