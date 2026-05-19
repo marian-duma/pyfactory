@@ -92,7 +92,7 @@ def main():
     time.sleep(0.5)
     sim.startSimulation()
     
-    generator = CubeGenerator(sim)
+    generator = TetrominoGenerator(sim)
     conveyor = ConveyorHandler(sim, "/conveyor")
     robot = FeedRobot('UR5')
     
@@ -104,19 +104,21 @@ def main():
     base_pos: list[int] = sim.getObjectPosition(robot.simRobot, -1)
     offset_x = 0.5
     box_spacing = 0.3
-
-    create_sorting_box(sim, position=[base_pos[0] + offset_x,  base_pos[1] - (1.5 * box_spacing), 0.0], color=[1, 1, 0])   # Square Box (Yellow)
-    create_sorting_box(sim, position=[base_pos[0] + offset_x,  base_pos[1] - (0.5 * box_spacing), 0.0], color=[1, 0, 0])   # Line Box (Red)
-    create_sorting_box(sim, position=[base_pos[0] + offset_x,  base_pos[1] + (0.5 * box_spacing) + 0.03, 0.0], color=[1, 0.5, 0]) # L Box (Orange)
-    create_sorting_box(sim, position=[base_pos[0] + offset_x,  base_pos[1] + (1.5 * box_spacing) + 0.03, 0.0], color=[0, 1, 0])   # S Box (Green)
+    boxes = [
+        create_sorting_box(sim, position=[base_pos[0] + offset_x,  base_pos[1] - (1.5 * box_spacing), 0.0], color=[1, 1, 0]),   # Square Box (Yellow)
+        create_sorting_box(sim, position=[base_pos[0] + offset_x,  base_pos[1] - (0.5 * box_spacing), 0.0], color=[1, 0, 0]),   # Line Box (Red)
+        create_sorting_box(sim, position=[base_pos[0] + offset_x,  base_pos[1] + (0.5 * box_spacing) + 0.03, 0.0], color=[1, 0.5, 0]), # L Box (Orange)
+        create_sorting_box(sim, position=[base_pos[0] + offset_x,  base_pos[1] + (1.5 * box_spacing) + 0.03, 0.0], color=[0, 1, 0])   # S Box (Green)
+    ]
     # TODO: refactor this
+    box_index = 0
     try:
         while is_running:
             # AI / control logic:
-            # tetromino.spawn_random_tetromino()
+            feed_manager.next_shape()
             # time.sleep(2)
             feed_manager.start_band()
-            feed_manager.next_cube()
+            # feed_manager.next_cube()
             time.sleep(2)
             feed_manager.stop_band()
             time.sleep(0.5)
@@ -129,12 +131,14 @@ def main():
             escape_joints = [90.0, current_joints[1], current_joints[2], current_joints[3], current_joints[4], current_joints[5]]
             
             # Use your class's joint movement function to smoothly pivot the waist
-            robot.MoveJ(escape_joints, speed=30) 
-            
+            robot.MoveJ(escape_joints, speed=30)
+            box_pos = feed_manager.robot.GetObjectPosition2(boxes[box_index % 4])
+            sim.setObjectPosition(feed_manager.release_handle, feed_manager.robot.simRobot, [box_pos[0]/1000, box_pos[1]/1000 + 0.175, box_pos[2]/1000 + 0.2])
             feed_manager.release_cube()
             
             robot.MoveJ([-escape_joints[0], *escape_joints[1:]], speed=30) 
             
+            box_index += 1
             client.step()
 
     except Exception as e:

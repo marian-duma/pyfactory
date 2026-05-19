@@ -1,12 +1,13 @@
 from handlers.conveyor_handler import ConveyorHandler
 from handlers.cube_generator import CubeGenerator
 from handlers.feed_robot import FeedRobot
+from handlers.tetromino_generator import TetrominoGenerator
 class FeedManager:
-    def __init__(self, cube_generator : CubeGenerator, conveyor_handler : ConveyorHandler,
+    def __init__(self, generator : TetrominoGenerator, conveyor_handler : ConveyorHandler,
                  robot: FeedRobot, pick_cube_target: str, release_cube_target: str) -> None:
         self.sim = robot.sim
         
-        self.generator = cube_generator
+        self.generator = generator
         self.conveyor = conveyor_handler
         self.robot = robot
 
@@ -30,7 +31,14 @@ class FeedManager:
         cube_position[2] += self.robot.height_offset
         self.sim.setObjectPosition(self.pick_handle, self.robot.simRobot, cube_position)
         self.sim.setObjectParent(self.pick_handle, last_cube, True)
-        
+    
+    def next_shape(self):
+        shape = self.generator.spawn_random_tetromino()
+        self.generator.cubes.append(shape)
+        cube_position = [ x/1000 for x in self.robot.GetObjectPosition2(shape)[0:3] ]
+        cube_position[2] += self.robot.height_offset
+        self.sim.setObjectPosition(self.pick_handle, self.robot.simRobot, cube_position)
+        self.sim.setObjectParent(self.pick_handle, shape, True)
     
     def pick_cube(self):
         self.sim.setObjectParent(self.pick_handle, -1, True)

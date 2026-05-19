@@ -1,10 +1,9 @@
 import random
+from .cube_generator import CubeGenerator
 
-class TetrominoGenerator:
+class TetrominoGenerator(CubeGenerator):
     def __init__(self, sim, spawn_rate=5.0, spawn_position=None):
-        self.sim = sim
-        self.spawn_rate = spawn_rate
-        self.template_cube = self.sim.getObject('/cube')
+        super().__init__(sim)
         
         # Grid block sizing (match your template cube size, e.g., 5cm)
         self.block_size = 0.05 
