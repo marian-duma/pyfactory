@@ -8,7 +8,6 @@ class ConveyorHandler:
     def __init__(self, sim, conveyor_name: str):
         self._sim = sim
         self._handle = self._sim.getObject(conveyor_name)
-        
         if self._handle == -1:
             raise ValueError(f"Conveyor '{conveyor_name}' not found in scene.")
 

@@ -26,7 +26,9 @@ class CubeGenerator:
         self.sim.setObjectPosition(new_cube_handle, -1, self.spawn_position)
         
         # Make the object visible, dynamic and responsive
+        self.sim.setShapeColor(new_cube_handle, None, self.sim.colorcomponent_ambient_diffuse, [1.0, 0.0, 0.0])
         self.sim.setObjectInt32Param(new_cube_handle, self.sim.objintparam_visibility_layer, 1)
         self.sim.setObjectInt32Param(new_cube_handle, self.sim.shapeintparam_static, 0)
         self.sim.setObjectInt32Param(new_cube_handle, self.sim.shapeintparam_respondable, 1)
+        self.sim.setShapeMass(new_cube_handle, 0.1)
         self.sim.resetDynamicObject(new_cube_handle)

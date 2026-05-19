@@ -5,6 +5,6 @@ def connect_to_sim():
     client = RemoteAPIClient()
     sim = client.getObject('sim')
     
-    # client.setStepping(True)
+    client.setStepping(True)
     
     return client, sim
