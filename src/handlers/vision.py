@@ -80,7 +80,7 @@ class OpenCVDetector:
         # 6. Calculate the average color ONLY inside that mask
         hue, sat, val, _ = cv2.mean(hsv_frame, mask=mask)
         
-        print(f"DEBUG SHAPE COLOR: H={hue:.1f} | S={sat:.1f} | V={val:.1f}")
+        # print(f"DEBUG SHAPE COLOR: H={hue:.1f} | S={sat:.1f} | V={val:.1f}")
 
         # 7. Route to classification logic
         return self._classify_color(hue, sat, val)

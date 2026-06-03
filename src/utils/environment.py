@@ -61,3 +61,6 @@ def create_boxes(sim, base_pos):
         create_sorting_box(sim, position=[base_pos[0] + offset_x,  base_pos[1] + (0.5 * box_spacing) + 0.03, 0.0], color=[1, 0.5, 0]), # L Box (Orange)
         create_sorting_box(sim, position=[base_pos[0] + offset_x,  base_pos[1] + (1.5 * box_spacing) + 0.03, 0.0], color=[0, 1, 0])   # S Box (Green)
     ]
+
+def init_env():
+    pass
