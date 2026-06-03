@@ -13,7 +13,7 @@ from handlers.cube_generator import CubeGenerator
 from handlers.conveyor_handler import ConveyorHandler
 from handlers.feed_robot import FeedRobot
 from handlers.tetromino_generator import TetrominoGenerator
-from handlers.vision import ColorDetector
+from handlers.vision import ShapeDetector
 
 from managers.feed_manager import FeedManager
 
@@ -54,22 +54,32 @@ def main():
     start_time = sim.getSimulationTime()
     base_pos: list[int] = sim.getObjectPosition(robot.simRobot, -1)
     boxes = create_boxes(sim, base_pos)
-    color_sensor = ColorDetector(sim)
-    # TODO: refactor this
+    shape_detector = ShapeDetector(sim)
+    color_map = {
+        "YELLOW": 0,
+        "RED": 1,
+        "ORANGE": 2,  # Grouping warm colors together
+        "GREEN": 3,
+        "UNKNOWN": 0  # Dump unidentified objects into the first box
+    }
+    
     box_index = 0
     try:
         while is_running:
             # AI / control logic:
             feed_manager.start_band()
             feed_manager.next_shape()
+            feed_manager.move_away_handle()
             while not feed_manager.conveyor.should_stop():
                 pass
             
             feed_manager.stop_band()
             time.sleep(0.5)
-            color = color_sensor.get_color2()
-            print(f"Robot: I see a {color} cube!")
+            color = shape_detector.get_color2()
+            # shape, pos = shape_detector.get_shape_and_world_pos()
             feed_manager.pick_cube()
+            
+            
             current_joints = robot.ReadJointPosition()
     
             # Force ONLY the base joint (joint 1) to swing over toward the box.
@@ -78,7 +88,10 @@ def main():
             
             # Use your class's joint movement function to smoothly pivot the waist
             robot.MoveJ(escape_joints, speed=30)
-            box_pos = feed_manager.robot.GetObjectPosition2(boxes[box_index % 4])
+            
+            target_box_index = color_map.get(color, 0)
+            target_box = boxes[target_box_index]
+            box_pos = feed_manager.robot.GetObjectPosition2(target_box)
             sim.setObjectPosition(feed_manager.release_handle, feed_manager.robot.simRobot, [box_pos[0]/1000, box_pos[1]/1000 + 0.175, box_pos[2]/1000 + 0.2])
             feed_manager.release_cube()
             

@@ -44,10 +44,13 @@ class FeedManager:
         # while self.conveyor.get_cube_position() is None:
         #     time.sleep(0.1)
         
-    
-    def pick_cube(self):
+    def move_away_handle(self):
+        self.sim.setObjectPosition(self.pick_handle, -1, [0.0,0.0,0.0])
+
+    def pick_cube(self, cube_position=None):
         shape = self.generator.cubes[-1]
-        cube_position = self.conveyor.get_cube_position()
+        if cube_position == None:
+            cube_position = self.conveyor.get_cube_position()
         cube_position[1] -= 0.03 # type: ignore
         cube_position[2] += self.robot.height_offset # type: ignore
         self.sim.setObjectPosition(self.pick_handle, -1, cube_position)
