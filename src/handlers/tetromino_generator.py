@@ -5,7 +5,6 @@ class TetrominoGenerator(CubeGenerator):
     def __init__(self, sim, spawn_rate=5.0, spawn_position=None):
         super().__init__(sim)
         
-        # Grid block sizing (match your template cube size, e.g., 5cm)
         self.block_size = 0.05 
         
         if spawn_position is None:
