@@ -1,2 +1,2 @@
 # PyFactory
-Smart factory simulation using CoppeliaSim and Python.
+Pick and place robot simulation with different shapes and colors.
