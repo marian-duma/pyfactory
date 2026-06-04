@@ -61,7 +61,8 @@ def main():
         while is_running:
             # AI / control logic:
             feed_manager.start_band()
-            feed_manager.next_shape()
+            if not feed_manager.conveyor.should_stop():
+                feed_manager.next_shape()
             feed_manager.move_away_handle()
             while not feed_manager.conveyor.should_stop():
                 pass
